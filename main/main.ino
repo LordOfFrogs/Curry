@@ -1,6 +1,5 @@
-#include <PS4BT.h>;
-#include <usbhub.h>;
-#include <Servo.h>;
+#include <PS4Controller.h>
+#include <Servo.h>
 
 #define EYES_SERVO_PIN 3
 #define HEAD_SERVO_PIN 2
@@ -15,6 +14,7 @@
 #define SWIVEL_MAX 110
 #define SWIVEL_NEUTRAL 60
 #define SWIVEL_MIN 20
+#define PS4_MAC "xx:xx:xx:xx:xx:xx"
 
 USB usb;
 BTD Btd(&usb);
@@ -33,12 +33,12 @@ int eyesPos = EYES_NEUTRAL;
 
 void setup() {
   Serial.begin(9600);
+  PS4.begin(PS4_MAC);
 
-  // bluetooth init
-  if (usb.Init() == -1) {
-    Serial.print(F("\r\nOSC did not start"));
-  }
-  Serial.print(F("\r\nPS4 Bluetooth Library Started"));
+  // controller init
+  Serial.print("Waiting for bluetooth connection...");
+  while (!PS4.isConnected());
+  Serial.println("PS4 controller Connected!");
 
   // servos
   eyesServo.attach(EYES_SERVO_PIN);
@@ -51,32 +51,38 @@ void setup() {
 }
 
 void loop() {
-  usb.Task();
-  
   if(PS4.connected()) {
-    headPos += PS4.getAnalogHat(LeftHatY);
+    updateServoPositions();
+  }
+
+  writeToServos();
+}
+
+void updateServoPositions() {
+  headPos += PS4.data.analog.stick.ly;
     headPos = constrain(headPos, HEAD_MIN, HEAD_MAX);
 
-    swivelPos += PS4.getAnalogHat(LeftHatX);
+    swivelPos += PS4.data.analog.stick.lx;
     swivelPos = constrain(swivelPos, SWIVEL_MIN, SWIVEL_MAX);
 
-    if (PS4.getButtonClick(CROSS)) {
+    if (PS4.data.button.cross) {
       eyesPos = EYES_HAPPY;
     }
-    if(PS4.getButtonClick(CIRCLE)) {
+    if(PS4.data.button.circle) {
       eyesPos = EYES_CLOSED;
     }
-    if(PS4.getButtonClick(SQUARE)) {
+    if(PS4.data.button.square) {
       eyesPos = EYES_NEUTRAL;
     }
 
-    if(PS4.getButtonPress(L1) && PS4.getButtonPress(R1)) {
+    if(PS4.data.button.l1 && PS4.data.button.r1) {
       headPos = HEAD_NEUTRAL;
       swivelPos = SWIVEL_NEUTRAL;
       eyesPos = EYES_NEUTRAL;
     }
-  }
+}
 
+void writeToServos() {
   headServo.write(headPos);
   swivelServo.write(swivelPos);
   eyesServo.write(eyesPos);
