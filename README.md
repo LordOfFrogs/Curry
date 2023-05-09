@@ -19,9 +19,13 @@ esp_bt_gap_set_scan_mode(ESP_BT_SCAN_MODE_CONNECTABLE);
 Then in the Arduino IDE board manager, install "esp32" **version 1.0.4**
 
 Find the MAC address of the Esp32 board using getESP32MAC.ino and mark it down
+
 Install [SixAxisPairer](https://sixaxispairtool.software.informer.com/download/) and run it with the PS4 controller plugged in via USB.
+
 Enter the Esp32's MAC address to the controller using SixAxisPairer
+
 Finally, in main.ino, enter the Esp32's MAC address as the ESP32_MAC constant
+
 ## Controls
 |Button|Action|
 |------|------|
