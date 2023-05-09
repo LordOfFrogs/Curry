@@ -14,7 +14,7 @@
 #define SWIVEL_MAX 110
 #define SWIVEL_NEUTRAL 60
 #define SWIVEL_MIN 20
-#define PS4_MAC "xx:xx:xx:xx:xx:xx"
+#define ESP_MAC "E0:5A:1B:AC:6D:0C"
 
 USB usb;
 BTD Btd(&usb);
@@ -33,7 +33,7 @@ int eyesPos = EYES_NEUTRAL;
 
 void setup() {
   Serial.begin(9600);
-  PS4.begin(PS4_MAC);
+  PS4.begin(ESP_MAC);
 
   // controller init
   Serial.print("Waiting for bluetooth connection...");
