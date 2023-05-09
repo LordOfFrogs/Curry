@@ -1,5 +1,5 @@
 #include <PS4Controller.h>
-#include <Servo.h>
+#include <ESP32Servo.h>
 
 #define EYES_SERVO_PIN 3
 #define HEAD_SERVO_PIN 2
@@ -31,7 +31,7 @@ int eyesPos = EYES_NEUTRAL;
 
 void setup() {
   Serial.begin(9600);
-  PS4.begin(ESP_MAC);
+  PS4.begin(ESP32_MAC);
 
   // controller init
   Serial.print("Waiting for bluetooth connection...");
@@ -49,7 +49,7 @@ void setup() {
 }
 
 void loop() {
-  if(PS4.connected()) {
+  if(PS4.isConnected()) {
     updateServoPositions();
   }
 
