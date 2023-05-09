@@ -14,11 +14,9 @@
 #define SWIVEL_MAX 110
 #define SWIVEL_NEUTRAL 60
 #define SWIVEL_MIN 20
-#define ESP_MAC "E0:5A:1B:AC:6D:0C"
+#define ESP32_MAC "E0:5A:1B:AC:6D:0C"
 
-USB usb;
-BTD Btd(&usb);
-PS4BT PS4(&Btd, PAIR);
+
 Servo eyesServo;
 Servo headServo;
 Servo swivelServo;
