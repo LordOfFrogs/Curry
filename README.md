@@ -1,6 +1,8 @@
 # Kuri
 ## Configuration
 ### Library Installation
+Install the [Esp32 Servo library](https://github.com/madhephaestus/ESP32Servo)
+
 Install [PS4-esp32 library](https://github.com/aed3/PS4-esp32) then navigate to its directory and edit the following lines in ps4_spp.c:
 ```c
 #if  CONFIG_IDF_COMPATIBILITY  >=  IDF_COMPATIBILITY_MASTER_D9CE0BB
