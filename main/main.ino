@@ -15,6 +15,7 @@
 #define SWIVEL_NEUTRAL 60
 #define SWIVEL_MIN 20
 #define ESP32_MAC "E0:5A:1B:AC:6D:0C"
+#define DEADZONE 15
 
 
 Servo eyesServo;
@@ -28,6 +29,8 @@ byte vibrate = 0;
 int headPos = HEAD_NEUTRAL;
 int swivelPos = SWIVEL_NEUTRAL;
 int eyesPos = EYES_NEUTRAL;
+
+long t1 = 0;
 
 void setup() {
   Serial.begin(9600);
@@ -54,30 +57,37 @@ void loop() {
   }
 
   writeToServos();
+  t1 = millis();
 }
 
 void updateServoPositions() {
-  headPos += PS4.data.analog.stick.ly;
-    headPos = constrain(headPos, HEAD_MIN, HEAD_MAX);
+  int dt = (int)(millis() - t1);
+  int ly = PS4.LStickY();
+  ly = (abs(ly) < DEADZONE) ? 0 : ly;
 
-    swivelPos += PS4.data.analog.stick.lx;
-    swivelPos = constrain(swivelPos, SWIVEL_MIN, SWIVEL_MAX);
+  int lx = PS4.LStickX();
+  lx = (abs(lx) < DEADZONE) ? 0 : lx;
+  headPos += ly * (dt / 1000.0);
+  headPos = constrain(headPos, HEAD_MIN, HEAD_MAX);
 
-    if (PS4.data.button.cross) {
-      eyesPos = EYES_HAPPY;
-    }
-    if(PS4.data.button.circle) {
-      eyesPos = EYES_CLOSED;
-    }
-    if(PS4.data.button.square) {
-      eyesPos = EYES_NEUTRAL;
-    }
+  swivelPos += lx * (dt / 1000.0);
+  swivelPos = constrain(swivelPos, SWIVEL_MIN, SWIVEL_MAX);
 
-    if(PS4.data.button.l1 && PS4.data.button.r1) {
-      headPos = HEAD_NEUTRAL;
-      swivelPos = SWIVEL_NEUTRAL;
-      eyesPos = EYES_NEUTRAL;
-    }
+  if (PS4.Cross()) {
+    eyesPos = EYES_HAPPY;
+  }
+  if(PS4.Circle()) {
+    eyesPos = EYES_CLOSED;
+  }
+  if(PS4.Square()) {
+    eyesPos = EYES_NEUTRAL;
+  }
+
+  if(PS4.L1() && PS4.R1()) {
+    headPos = HEAD_NEUTRAL;
+    swivelPos = SWIVEL_NEUTRAL;
+    eyesPos = EYES_NEUTRAL;
+  }
 }
 
 void writeToServos() {
