@@ -1,21 +1,35 @@
 #include <PS4Controller.h>
 #include <ESP32Servo.h>
 
-#define EYES_SERVO_PIN 3
-#define HEAD_SERVO_PIN 2
-#define SWIVEL_SERVO_PIN 1
+const int EYES_SERVO_PIN = 18;
+const int HEAD_SERVO_PIN = 19;
+const int SWIVEL_SERVO_PIN = 21;
 
-#define EYES_HAPPY 5
-#define EYES_NEUTRAL 15
-#define EYES_CLOSED 35
-#define HEAD_MAX 95
-#define HEAD_NEUTRAL 75
-#define HEAD_MIN 50
-#define SWIVEL_MAX 110
-#define SWIVEL_NEUTRAL 60
-#define SWIVEL_MIN 20
-#define ESP32_MAC "E0:5A:1B:AC:6D:0C"
-#define DEADZONE 15
+const int MOTOR1_1 = 27;
+const int MOTOR1_2 = 26;
+const int MOTOR1_ENABLE = 14;
+const int MOTOR2_1 = 25;
+const int MOTOR2_2 = 33;
+const int MOTOR2_ENABLE = 32;
+
+const int PWM_FREQ = 30000;
+const int PWM1_CHANNEL = 0;
+const int PWM2_CHANNEL = 0;
+const int PWM_RESOLUTION = 8;
+
+const int EYES_HAPPY = 17;
+const int EYES_NEUTRAL = 25;
+const int EYES_CLOSED = 50;
+const int HEAD_MAX = 95;
+const int HEAD_NEUTRAL = 75;
+const int HEAD_MIN = 50;
+const int SWIVEL_MAX = 110;
+const int SWIVEL_NEUTRAL = 60;
+const int SWIVEL_MIN = 20;
+
+const char* ESP32_MAC = "E0:5A:1B:AC:6D:0C";
+
+const int DEADZONE = 30;
 
 
 Servo eyesServo;
@@ -30,7 +44,7 @@ int headPos = HEAD_NEUTRAL;
 int swivelPos = SWIVEL_NEUTRAL;
 int eyesPos = EYES_NEUTRAL;
 
-long t1 = 0;
+double t1 = 0;
 
 void setup() {
   Serial.begin(9600);
@@ -49,19 +63,34 @@ void setup() {
   eyesServo.write(EYES_NEUTRAL);
   headServo.write(HEAD_NEUTRAL);
   swivelServo.write(SWIVEL_NEUTRAL);
+
+  //motors
+  pinMode(MOTOR1_1, OUTPUT);
+  pinMode(MOTOR1_2, OUTPUT);
+  pinMode(MOTOR1_ENABLE, OUTPUT);
+  pinMode(MOTOR2_1, OUTPUT);
+  pinMode(MOTOR2_2, OUTPUT);
+  pinMode(MOTOR2_ENABLE, OUTPUT);
+
+  ledcSetup(PWM1_CHANNEL, PWM_FREQ, PWM_RESOLUTION);
+  ledcSetup(PWM2_CHANNEL, PWM_FREQ, PWM_RESOLUTION);
+
+  ledcAttachPin(MOTOR1_ENABLE, PWM1_CHANNEL);
+  ledcAttachPin(MOTOR2_ENABLE, PWM2_CHANNEL);
 }
 
 void loop() {
   if(PS4.isConnected()) {
     updateServoPositions();
+    drive();
   }
-
   writeToServos();
-  t1 = millis();
+  delay(50);
 }
 
 void updateServoPositions() {
-  int dt = (int)(millis() - t1);
+  double dt = double(millis()) - t1;
+  t1 = millis();
   int ly = PS4.LStickY();
   ly = (abs(ly) < DEADZONE) ? 0 : ly;
 
@@ -94,4 +123,28 @@ void writeToServos() {
   headServo.write(headPos);
   swivelServo.write(swivelPos);
   eyesServo.write(eyesPos);
+}
+
+void drive() {
+  double x = PS4.RStickX();
+  x = (abs(x) < DEADZONE) ? 0 : x;
+  x *= 2; // maps x from [-128,128) to [-255,255]
+  double y = PS4.RStickY();
+  y = (abs(y) < DEADZONE) ? 0 : y;
+  y *= 2; // maps y from [-128,128) to [-255,255]
+
+  // tank drive calculations (https://home.kendra.com/mauser/joystick.html)
+  double v = (255-abs(x))*(y/255)+y;
+  double w = (255-abs(y))*(x/255)+x;
+  double rDrive = (v+w)/2;
+  double lDrive = (v-w)/2;
+  //write to motors
+  ledcWrite(PWM1_CHANNEL, lDrive);
+  ledcWrite(PWM2_CHANNEL, rDrive);
+  //set directions
+  digitalWrite(MOTOR1_1, (lDrive >= 0) ? HIGH : LOW);
+  digitalWrite(MOTOR1_2, (lDrive >= 0) ? LOW : HIGH);
+
+  digitalWrite(MOTOR2_1, (rDrive >= 0) ? HIGH : LOW);
+  digitalWrite(MOTOR2_2, (rDrive >= 0) ? LOW : HIGH);
 }
