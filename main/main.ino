@@ -12,11 +12,6 @@ const int MOTOR2_1 = 25;
 const int MOTOR2_2 = 33;
 const int MOTOR2_ENABLE = 32;
 
-const int PWM_FREQ = 30000;
-const int PWM1_CHANNEL = 0;
-const int PWM2_CHANNEL = 0;
-const int PWM_RESOLUTION = 8;
-
 const int EYES_HAPPY = 15;
 const int EYES_NEUTRAL = 27;
 const int EYES_CLOSED = 50;
@@ -77,11 +72,10 @@ void setup() {
   pinMode(MOTOR2_2, OUTPUT);
   pinMode(MOTOR2_ENABLE, OUTPUT);
 
-  ledcSetup(PWM1_CHANNEL, PWM_FREQ, PWM_RESOLUTION);
-  ledcSetup(PWM2_CHANNEL, PWM_FREQ, PWM_RESOLUTION);
-
-  ledcAttachPin(MOTOR1_ENABLE, PWM1_CHANNEL);
-  ledcAttachPin(MOTOR2_ENABLE, PWM2_CHANNEL);
+  digitalWrite(MOTOR1_1, LOW);
+  digitalWrite(MOTOR1_2, LOW);
+  digitalWrite(MOTOR2_1, LOW);
+  digitalWrite(MOTOR2_2, LOW);
 }
 
 void loop() {
@@ -155,8 +149,8 @@ void drive() {
   double rDrive = (v+w)/2;
   double lDrive = (v-w)/2;
   //write to motors
-  ledcWrite(PWM1_CHANNEL, lDrive);
-  ledcWrite(PWM2_CHANNEL, rDrive);
+  analogWrite(MOTOR1_ENABLE, abs(lDrive));
+  analogWrite(MOTOR2_ENABLE, abs(rDrive));
   //set directions
   digitalWrite(MOTOR1_1, (lDrive >= 0) ? HIGH : LOW);
   digitalWrite(MOTOR1_2, (lDrive >= 0) ? LOW : HIGH);
