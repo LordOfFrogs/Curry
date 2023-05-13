@@ -17,19 +17,22 @@ const int PWM1_CHANNEL = 0;
 const int PWM2_CHANNEL = 0;
 const int PWM_RESOLUTION = 8;
 
-const int EYES_HAPPY = 17;
-const int EYES_NEUTRAL = 25;
+const int EYES_HAPPY = 15;
+const int EYES_NEUTRAL = 27;
 const int EYES_CLOSED = 50;
-const int HEAD_MAX = 95;
+const int HEAD_MAX = 100;
 const int HEAD_NEUTRAL = 75;
 const int HEAD_MIN = 50;
-const int SWIVEL_MAX = 110;
-const int SWIVEL_NEUTRAL = 60;
-const int SWIVEL_MIN = 20;
+const int SWIVEL_MAX = 120;
+const int SWIVEL_NEUTRAL = 79;
+const int SWIVEL_MIN = 30;
 
 const char* ESP32_MAC = "E0:5A:1B:AC:6D:0C";
 
 const int DEADZONE = 30;
+
+const int BLINK_DELAY = 7500; // time between blinks (ms)
+const int BLINK_DURATION = 200; // time it takes to blink once (ms)
 
 
 Servo eyesServo;
@@ -45,6 +48,8 @@ int swivelPos = SWIVEL_NEUTRAL;
 int eyesPos = EYES_NEUTRAL;
 
 double t1 = 0;
+long blinkStart = 0;
+int blinkPrevState = EYES_NEUTRAL;
 
 void setup() {
   Serial.begin(9600);
@@ -84,6 +89,17 @@ void loop() {
     updateServoPositions();
     drive();
   }
+
+  //blinking
+  if (millis() - blinkStart > BLINK_DELAY + BLINK_DURATION) {
+    blinkStart = millis();
+    blinkPrevState = eyesPos;
+    eyesPos = EYES_CLOSED;
+  } 
+  else if (millis() - blinkStart < BLINK_DURATION && millis() - blinkStart > BLINK_DURATION/2 && eyesPos == EYES_CLOSED) {
+    eyesPos = blinkPrevState;
+  }
+
   writeToServos();
   delay(50);
 }
