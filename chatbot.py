@@ -3,9 +3,9 @@ import speech_recognition as sr
 from gtts import gTTS
 from pydub import AudioSegment
 from pydub.playback import play
-import time
+import os
 
-openai.api_key = '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'
+openai.api_key = os.getenv("OPENAI_API_KEY")
 
 messages = [ {"role": "system", "content": 
     """you are an intelligent assistant named Kuri"""} ]
