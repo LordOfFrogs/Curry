@@ -4,6 +4,17 @@ from gtts import gTTS
 from pydub import AudioSegment
 from pydub.playback import play
 import os
+import pvporcupine
+from pvrecorder import PvRecorder
+
+pv_api_key = os.getenv('PICOVOICE_API_KEY')
+
+porcupine = pvporcupine.create(
+    access_key=pv_api_key,
+    keyword_paths=['C:\\Users\\ndtec\\Desktop\\Kuri\\chatbot\\Hey-Kuri_en_windows_v2_2_0.ppn']
+)
+
+recorder = PvRecorder(device_index=-1, frame_length=porcupine.frame_length)
 
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
@@ -62,7 +73,20 @@ def getReply(prompt):
     
     return reply
 
+def wakeWord():
+    keyword_index = porcupine.process(recorder.read())
+    return keyword_index >= 0
+
+question = False
 while(1):
+    if not question:
+        # wait for wake word
+        recorder.start()
+        print("waiting...")
+        while not wakeWord():
+            pass
+        recorder.stop()
+    
     print("listening...", end=' ', flush=True)
     prompt = getInput()
     if prompt == -1:
@@ -71,3 +95,4 @@ while(1):
     if prompt != 0:
         reply = getReply(prompt)
         speakText(reply)
+        question = reply[-1]=='?'
