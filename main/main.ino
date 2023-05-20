@@ -73,21 +73,21 @@ void setup() {
   //motors
   pinMode(MOTOR1_1, OUTPUT);
   pinMode(MOTOR1_2, OUTPUT);
-  pinMode(MOTOR1_ENABLE, OUTPUT);
+  //pinMode(MOTOR1_ENABLE, OUTPUT);
   pinMode(MOTOR2_1, OUTPUT);
   pinMode(MOTOR2_2, OUTPUT);
-  pinMode(MOTOR2_ENABLE, OUTPUT);
+  //pinMode(MOTOR2_ENABLE, OUTPUT);
 
   digitalWrite(MOTOR1_1, LOW);
   digitalWrite(MOTOR1_2, LOW);
   digitalWrite(MOTOR2_1, LOW);
   digitalWrite(MOTOR2_2, LOW);
 
-  // ledcSetup(pwmChannel1, freq, resolution);
-  // ledcAttachPin(MOTOR1_ENABLE, pwmChannel1);
+  ledcSetup(pwmChannel1, freq, resolution);
+  ledcAttachPin(MOTOR1_ENABLE, pwmChannel1);
 
-  // ledcSetup(pwmChannel2, freq, resolution);
-  // ledcAttachPin(MOTOR2_ENABLE, pwmChannel2);
+  ledcSetup(pwmChannel2, freq, resolution);
+  ledcAttachPin(MOTOR2_ENABLE, pwmChannel2);
 }
 
 void loop() {
@@ -162,13 +162,11 @@ void drive() {
   double lDrive = (v-w)/2;
   
   //write to motors
-  analogWrite(MOTOR1_ENABLE, 255);
-  analogWrite(MOTOR2_ENABLE, abs(rDrive));
+  ledcWrite(pwmChannel1, abs(lDrive));
+  ledcWrite(pwmChannel2, abs(rDrive));
   //set directions
-  // digitalWrite(MOTOR1_1, (lDrive >= 0) ? HIGH : LOW);
-  // digitalWrite(MOTOR1_2, (lDrive >= 0) ? LOW : HIGH);
-  digitalWrite(MOTOR1_1, LOW);
-  digitalWrite(MOTOR1_2, HIGH);
+  digitalWrite(MOTOR1_1, (lDrive >= 0) ? HIGH : LOW);
+  digitalWrite(MOTOR1_2, (lDrive >= 0) ? LOW : HIGH);
 
 
   digitalWrite(MOTOR2_1, (rDrive >= 0) ? HIGH : LOW);
