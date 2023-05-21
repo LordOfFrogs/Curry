@@ -165,8 +165,8 @@ void drive() {
   ledcWrite(pwmChannel1, abs(lDrive));
   ledcWrite(pwmChannel2, abs(rDrive));
   //set directions
-  digitalWrite(MOTOR1_1, (lDrive >= 0) ? HIGH : LOW);
-  digitalWrite(MOTOR1_2, (lDrive >= 0) ? LOW : HIGH);
+  digitalWrite(MOTOR1_1, (lDrive >= 0) ? LOW : HIGH);
+  digitalWrite(MOTOR1_2, (lDrive >= 0) ? HIGH : LOW);
 
 
   digitalWrite(MOTOR2_1, (rDrive >= 0) ? HIGH : LOW);
