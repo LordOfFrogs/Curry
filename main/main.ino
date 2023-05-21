@@ -1,5 +1,6 @@
 #include <PS4Controller.h>
 #include <ESP32Servo.h>
+#include <analogWrite.h>
 
 const int EYES_SERVO_PIN = 18;
 const int HEAD_SERVO_PIN = 19;
@@ -29,6 +30,11 @@ const int DEADZONE = 30;
 const int BLINK_DELAY = 7500; // time between blinks (ms)
 const int BLINK_DURATION = 200; // time it takes to blink once (ms)
 
+// Setting PWM properties
+const int freq = 10000;
+const int pwmChannel1 = 10;
+const int pwmChannel2 = 11;
+const int resolution = 8;
 
 Servo eyesServo;
 Servo headServo;
@@ -67,15 +73,21 @@ void setup() {
   //motors
   pinMode(MOTOR1_1, OUTPUT);
   pinMode(MOTOR1_2, OUTPUT);
-  pinMode(MOTOR1_ENABLE, OUTPUT);
+  //pinMode(MOTOR1_ENABLE, OUTPUT);
   pinMode(MOTOR2_1, OUTPUT);
   pinMode(MOTOR2_2, OUTPUT);
-  pinMode(MOTOR2_ENABLE, OUTPUT);
+  //pinMode(MOTOR2_ENABLE, OUTPUT);
 
   digitalWrite(MOTOR1_1, LOW);
   digitalWrite(MOTOR1_2, LOW);
   digitalWrite(MOTOR2_1, LOW);
   digitalWrite(MOTOR2_2, LOW);
+
+  ledcSetup(pwmChannel1, freq, resolution);
+  ledcAttachPin(MOTOR1_ENABLE, pwmChannel1);
+
+  ledcSetup(pwmChannel2, freq, resolution);
+  ledcAttachPin(MOTOR2_ENABLE, pwmChannel2);
 }
 
 void loop() {
@@ -148,12 +160,14 @@ void drive() {
   double w = (255-abs(y))*(x/255)+x;
   double rDrive = (v+w)/2;
   double lDrive = (v-w)/2;
+  
   //write to motors
-  analogWrite(MOTOR1_ENABLE, abs(lDrive));
-  analogWrite(MOTOR2_ENABLE, abs(rDrive));
+  ledcWrite(pwmChannel1, abs(lDrive));
+  ledcWrite(pwmChannel2, abs(rDrive));
   //set directions
   digitalWrite(MOTOR1_1, (lDrive >= 0) ? HIGH : LOW);
   digitalWrite(MOTOR1_2, (lDrive >= 0) ? LOW : HIGH);
+
 
   digitalWrite(MOTOR2_1, (rDrive >= 0) ? HIGH : LOW);
   digitalWrite(MOTOR2_2, (rDrive >= 0) ? LOW : HIGH);
