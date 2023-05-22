@@ -1,8 +1,9 @@
 import openai
 import speech_recognition as sr
 from gtts import gTTS
-from pydub import AudioSegment
-from pydub.playback import play
+import sounddevice as sd
+import librosa
+import multiprocessing
 import os
 import pvporcupine
 from pvrecorder import PvRecorder
@@ -11,7 +12,7 @@ pv_api_key = os.getenv('PICOVOICE_API_KEY')
 
 porcupine = pvporcupine.create(
     access_key=pv_api_key,
-    keyword_paths=['C:\\Users\\ndtec\\Desktop\\Kuri\\chatbot\\Hey-Kuri_en_windows_v2_2_0.ppn']
+    keyword_paths=['/home/kuri/Kuri/chatbot/Hey-Kuri_en_raspberry-pi_v2_2_0.ppn']
 )
 
 recorder = PvRecorder(device_index=-1, frame_length=porcupine.frame_length)
@@ -23,11 +24,14 @@ messages = [ {"role": "system", "content":
 
 r = sr.Recognizer()
 
+sd.default.device = 'pulse'
+
 def speakText(command):
     engine = gTTS(text=command)
     engine.save("output.mp3")
-    p = AudioSegment.from_file("output.mp3")
-    play(p)
+    os.system("mpg123 -w output.wav output.mp3")
+    array, smp_rt = librosa.load('output.mp3')
+    sd.play(array, smp_rt, blocking=True)
     print("done speaking")
 
 def getInput():
@@ -94,5 +98,11 @@ while(1):
         continue
     if prompt != 0:
         reply = getReply(prompt)
-        speakText(reply)
+        process = multiprocessing.Process(target=speakText, args=(reply,))
+        process.start()
+        while process.is_alive():
+            if wakeWord():
+                process.terminate()
+                question = True
+                continue
         question = reply[-1]=='?'
