@@ -150,7 +150,7 @@ void writeToServos() {
 void drive() {
   double x = PS4.RStickX();
   x = (abs(x) < DEADZONE) ? 0 : x;
-  x *= 2; // maps x from [-128,128) to [-255,255]
+  x *= -2; // maps x from [-128,128) to [-255,255] and inverts
   double y = PS4.RStickY();
   y = (abs(y) < DEADZONE) ? 0 : y;
   y *= 2; // maps y from [-128,128) to [-255,255]
@@ -165,8 +165,8 @@ void drive() {
   ledcWrite(pwmChannel1, abs(lDrive));
   ledcWrite(pwmChannel2, abs(rDrive));
   //set directions
-  digitalWrite(MOTOR1_1, (lDrive >= 0) ? HIGH : LOW);
-  digitalWrite(MOTOR1_2, (lDrive >= 0) ? LOW : HIGH);
+  digitalWrite(MOTOR1_1, (lDrive >= 0) ? LOW : HIGH);
+  digitalWrite(MOTOR1_2, (lDrive >= 0) ? HIGH : LOW);
 
 
   digitalWrite(MOTOR2_1, (rDrive >= 0) ? HIGH : LOW);
