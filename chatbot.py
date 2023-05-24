@@ -3,10 +3,13 @@ import speech_recognition as sr
 from gtts import gTTS
 import sounddevice as sd
 import librosa
-import multiprocessing
 import os
+import time
 import pvporcupine
 from pvrecorder import PvRecorder
+import warnings
+
+warnings.filterwarnings('ignore')
 
 pv_api_key = os.getenv('PICOVOICE_API_KEY')
 
@@ -24,14 +27,22 @@ messages = [ {"role": "system", "content":
 
 r = sr.Recognizer()
 
-sd.default.device = 'pulse'
-
 def speakText(command):
     engine = gTTS(text=command)
     engine.save("output.mp3")
-    os.system("mpg123 -w output.wav output.mp3")
     array, smp_rt = librosa.load('output.mp3')
-    sd.play(array, smp_rt, blocking=True)
+
+    sd.play(array, smp_rt, blocking=False)
+    start = time.perf_counter()
+    duration = array.shape[0]/smp_rt
+    recorder.start()
+    while time.perf_counter() - start < duration:
+        if wakeWord():
+            sd.stop()
+            recorder.stop()
+            print("interrupted")
+            return 1
+    recorder.stop()
     print("done speaking")
 
 def getInput():
@@ -98,11 +109,7 @@ while(1):
         continue
     if prompt != 0:
         reply = getReply(prompt)
-        process = multiprocessing.Process(target=speakText, args=(reply,))
-        process.start()
-        while process.is_alive():
-            if wakeWord():
-                process.terminate()
-                question = True
-                continue
+        if speakText(reply) == 1:
+            question = True
+            continue
         question = reply[-1]=='?'
