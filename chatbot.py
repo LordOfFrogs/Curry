@@ -1,6 +1,5 @@
 import openai
 import speech_recognition as sr
-import pyttsx3
 import os
 from subprocess import Popen 
 import pvporcupine
@@ -28,19 +27,16 @@ messages = [ {"role": "system", "content":
 
 r = sr.Recognizer()
 
-engine = pyttsx3.init()
-engine.setProperty('voice', 'mb-us1')
-engine.setProperty('rate', 100)
-
 def speakText(command):
     # play text to speech
-    cmd = Popen(['espeak', '-g10', '-ven-us', command])
+    cmd = Popen(['espeak', '-s140', '-vmb-us1', command])
     
+    # check for interrupts
     recorder.start()
     while cmd.poll() == None:
         if wakeWord():
             recorder.stop()
-            cmd.terminate()
+            cmd.kill()
             return 1
     recorder.stop()
     print("done speaking")
@@ -100,11 +96,13 @@ while(1):
             pass
         recorder.stop()
     
+    # get input
     print("listening...", end=' ', flush=True)
     prompt = getInput()
-    if prompt == -1:
+    if prompt == -1 or prompt == 0: # error or no input
         speakText("Sorry, I didn't get that")
         continue
+    # get reply
     if prompt != 0:
         reply = getReply(prompt)
 
