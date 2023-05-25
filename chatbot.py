@@ -1,10 +1,8 @@
 import openai
 import speech_recognition as sr
-from gtts import gTTS
-import sounddevice as sd
-import librosa
+import pyttsx3
 import os
-import time
+from subprocess import Popen 
 import pvporcupine
 from pvrecorder import PvRecorder
 import warnings
@@ -30,30 +28,28 @@ messages = [ {"role": "system", "content":
 
 r = sr.Recognizer()
 
-def speakText(command):
-    # text to speech saved to file
-    engine = gTTS(text=command)
-    engine.save("output.mp3")
-    # load and file
-    array, smp_rt = librosa.load('output.mp3')
+engine = pyttsx3.init()
+engine.setProperty('voice', 'mb-us1')
+engine.setProperty('rate', 100)
 
-    sd.play(array, smp_rt, blocking=False)
-    start = time.perf_counter()
-    duration = array.shape[0]/smp_rt
+def speakText(command):
+    # play text to speech
+    cmd = Popen(['espeak', '-g10', '-ven-us', command])
+    
     recorder.start()
-    while time.perf_counter() - start < duration:
+    while cmd.poll() == None:
         if wakeWord():
-            sd.stop()
             recorder.stop()
-            print("interrupted")
+            cmd.terminate()
             return 1
     recorder.stop()
     print("done speaking")
 
+
 def getInput():
     # use the microphone as source for input.
     with sr.Microphone() as source:
-        r.adjust_for_ambient_noise(source, duration=1)
+        # r.adjust_for_ambient_noise(source, duration=1)
         
         #listens for the user's input
         audio = r.listen(source)
@@ -111,6 +107,7 @@ while(1):
         continue
     if prompt != 0:
         reply = getReply(prompt)
+
         if speakText(reply) == 1:
             question = True
             continue
