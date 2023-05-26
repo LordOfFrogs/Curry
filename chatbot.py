@@ -27,16 +27,16 @@ messages = [ {"role": "system", "content":
 
 r = sr.Recognizer()
 
-
 def speakText(command):
     # play text to speech
-    cmd = Popen(['espeak', '-s150', '-vmb-us1', command])
-    
+    cmd = Popen(['espeak', '-s140', '-vmb-us1', command])
+ 
+    # check for interrupts
     recorder.start()
     while cmd.poll() == None:
         if wakeWord():
             recorder.stop()
-            cmd.terminate()
+            cmd.kill()
             return 1
     recorder.stop()
     print("done speaking")
@@ -96,11 +96,13 @@ while(1):
             pass
         recorder.stop()
     
+    # get input
     print("listening...", end=' ', flush=True)
     prompt = getInput()
-    if prompt == -1:
+    if prompt == -1 or prompt == 0: # error or no input
         speakText("Sorry, I didn't get that")
         continue
+    # get reply
     if prompt != 0:
         reply = getReply(prompt)
 
