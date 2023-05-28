@@ -2,5 +2,4 @@
 
 source /etc/profile
 echo "Running"
-echo $OPENAI_API_KEY
-python /home/kuri/Kuri/chatbot.py
+/home/kuri/Kuri/bin/python /home/kuri/Kuri/chatbot.py

@@ -1,0 +1,5 @@
+openai
+SpeechRecognition
+pvporcupine
+pvrecorder
+PyAudio

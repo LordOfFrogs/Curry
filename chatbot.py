@@ -1,3 +1,5 @@
+#! /home/kuri/Kuri/bin/python
+
 import openai
 import speech_recognition as sr
 import os
