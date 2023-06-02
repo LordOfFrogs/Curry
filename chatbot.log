@@ -1,0 +1,12 @@
+Running
+/k7+R5mwZ3vjQ8krtDNqbkpESSF5ZdOVMc5SaH35w8zFNlUhRUNjkw==
+ALSA lib pcm_dsnoop.c:566:(snd_pcm_dsnoop_open) unable to open slave
+ALSA lib pcm_dsnoop.c:566:(snd_pcm_dsnoop_open) unable to open slave
+ALSA lib pcm_dsnoop.c:566:(snd_pcm_dsnoop_open) unable to open slave
+Traceback (most recent call last):
+  File "/home/kuri/Kuri/chatbot.py", line 22, in <module>
+    recorder = PvRecorder(device_index=-1, frame_length=porcupine.frame_length)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/kuri/Kuri/lib/python3.11/site-packages/pvrecorder/pvrecorder.py", line 81, in __init__
+    raise self._PVRECORDER_STATUS_TO_EXCEPTION[status]("Failed to initialize pv_recorder.")
+RuntimeError: Failed to initialize pv_recorder.
