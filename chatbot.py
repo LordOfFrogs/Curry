@@ -7,12 +7,25 @@ from subprocess import Popen
 import pvporcupine
 from pvrecorder import PvRecorder
 import warnings
+import urllib3
 
 warnings.filterwarnings('ignore')
 
 LISTENING_PATH = '/home/kuri/Kuri/listening.wav'
 CONFIRM_PATH = '/home/kuri/Kuri/confirm.wav'
 WAITING_PATH = '/home/kuri/Kuri/waiting.wav'
+CONNECTING_PATH = '/home/kuri/Kuri/connecting.wav'
+
+def isConnected():
+    try:
+        urllib3.request("GET", "https://google.com")
+        return True
+    except:
+        return False
+
+connecting_process = Popen(['play', CONNECTING_PATH, 'repeat 100'])
+while not isConnected(): pass
+connecting_process.kill()
 
 pv_api_key = os.getenv('PICOVOICE_API_KEY')
 
@@ -32,6 +45,7 @@ messages = [ {"role": "system", "content":
     """you are an intelligent assistant named Kuri. provide responses as concisely as possible"""} ]
 
 r = sr.Recognizer()
+
 
 def speakText(command):
     # play text to speech
