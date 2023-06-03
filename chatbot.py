@@ -10,6 +10,10 @@ import warnings
 
 warnings.filterwarnings('ignore')
 
+LISTENING_PATH = '/home/kuri/Kuri/listening.wav'
+CONFIRM_PATH = '/home/kuri/Kuri/confirm.wav'
+WAITING_PATH = '/home/kuri/Kuri/waiting.wav'
+
 pv_api_key = os.getenv('PICOVOICE_API_KEY')
 
 # wakeword recognizer
@@ -25,7 +29,7 @@ openai.api_key = os.getenv("OPENAI_API_KEY")
 
 # initial message to gpt
 messages = [ {"role": "system", "content": 
-    """you are an intelligent assistant named Kuri"""} ]
+    """you are an intelligent assistant named Kuri. provide responses as concisely as possible"""} ]
 
 r = sr.Recognizer()
 
@@ -90,6 +94,7 @@ def wakeWord() -> bool:
 
 question = False
 while(1):
+    Popen(['play', WAITING_PATH])
     if not question:
         # wait for wake word
         recorder.start()
@@ -97,10 +102,11 @@ while(1):
         while not wakeWord():
             pass
         recorder.stop()
-    
+    Popen(['play', LISTENING_PATH])
     # get input
     print("listening...", end=' ', flush=True)
     prompt = getInput()
+    Popen(['play', CONFIRM_PATH])
     if prompt == -1 or prompt == 0: # error or no input
         speakText("Sorry, I didn't get that")
         continue
