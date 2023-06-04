@@ -23,7 +23,7 @@ def isConnected():
     except:
         return False
 
-connecting_process = Popen(['play', CONNECTING_PATH, 'repeat 100'])
+connecting_process = Popen(['play', CONNECTING_PATH, 'repeat', '100'])
 while not isConnected(): pass
 connecting_process.kill()
 
