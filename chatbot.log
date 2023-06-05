@@ -1,0 +1,15 @@
+Running
+play WARN alsa: can't encode 0-bit Unknown or not applicable
+play WARN alsa: can't encode 0-bit Unknown or not applicable
+
+/home/kuri/Kuri/waiting.wav:
+
+ File Size: 161k      Bit Rate: 2.12M
+  Encoding: Signed PCM    
+  Channels: 2 @ 24-bit   
+Samplerate: 44100Hz      
+Replaygain: off         
+  Duration: 00:00:00.61  
+
+In:0.00% 00:00:00.00 [00:00:00.61] Out:0     [      |      ]        Clip:0    In:45.8% 00:00:00.28 [00:00:00.33] Out:12.3k [ -====|====- ]        Clip:0    In:76.3% 00:00:00.46 [00:00:00.14] Out:20.5k [  ====|====- ]        Clip:0    In:100%  00:00:00.61 [00:00:00.00] Out:26.9k [    ==|==-   ]        Clip:0    In:100%  00:00:00.61 [00:00:00.00] Out:26.9k [      |      ]        Clip:0    
+Done.

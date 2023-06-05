@@ -1,15 +1,31 @@
+#! /home/kuri/Kuri/bin/python
+
 import openai
 import speech_recognition as sr
-from gtts import gTTS
-import sounddevice as sd
-import librosa
 import os
-import time
+from subprocess import Popen 
 import pvporcupine
 from pvrecorder import PvRecorder
 import warnings
+import urllib3
 
 warnings.filterwarnings('ignore')
+
+LISTENING_PATH = '/home/kuri/Kuri/listening.wav'
+CONFIRM_PATH = '/home/kuri/Kuri/confirm.wav'
+WAITING_PATH = '/home/kuri/Kuri/waiting.wav'
+CONNECTING_PATH = '/home/kuri/Kuri/connecting.wav'
+
+def isConnected():
+    try:
+        urllib3.request("GET", "https://google.com")
+        return True
+    except:
+        return False
+
+connecting_process = Popen(['play', CONNECTING_PATH, 'repeat', '100'])
+while not isConnected(): pass
+connecting_process.kill()
 
 pv_api_key = os.getenv('PICOVOICE_API_KEY')
 
@@ -26,34 +42,30 @@ openai.api_key = os.getenv("OPENAI_API_KEY")
 
 # initial message to gpt
 messages = [ {"role": "system", "content": 
-    """you are an intelligent assistant named Kuri"""} ]
+    """you are an intelligent assistant named Kuri. provide responses as concisely as possible"""} ]
 
 r = sr.Recognizer()
 
-def speakText(command):
-    # text to speech saved to file
-    engine = gTTS(text=command)
-    engine.save("output.mp3")
-    # load and file
-    array, smp_rt = librosa.load('output.mp3')
 
-    sd.play(array, smp_rt, blocking=False)
-    start = time.perf_counter()
-    duration = array.shape[0]/smp_rt
+def speakText(command):
+    # play text to speech
+    cmd = Popen(['espeak', '-s140', '-vmb-us1', command])
+ 
+    # check for interrupts
     recorder.start()
-    while time.perf_counter() - start < duration:
+    while cmd.poll() == None:
         if wakeWord():
-            sd.stop()
             recorder.stop()
-            print("interrupted")
+            cmd.kill()
             return 1
     recorder.stop()
     print("done speaking")
 
+
 def getInput():
     # use the microphone as source for input.
     with sr.Microphone() as source:
-        r.adjust_for_ambient_noise(source, duration=1)
+        # r.adjust_for_ambient_noise(source, duration=1)
         
         #listens for the user's input
         audio = r.listen(source)
@@ -96,6 +108,7 @@ def wakeWord() -> bool:
 
 question = False
 while(1):
+    Popen(['play', WAITING_PATH])
     if not question:
         # wait for wake word
         recorder.start()
@@ -103,14 +116,18 @@ while(1):
         while not wakeWord():
             pass
         recorder.stop()
-    
+    Popen(['play', LISTENING_PATH])
+    # get input
     print("listening...", end=' ', flush=True)
     prompt = getInput()
-    if prompt == -1:
+    Popen(['play', CONFIRM_PATH])
+    if prompt == -1 or prompt == 0: # error or no input
         speakText("Sorry, I didn't get that")
         continue
+    # get reply
     if prompt != 0:
         reply = getReply(prompt)
+
         if speakText(reply) == 1:
             question = True
             continue

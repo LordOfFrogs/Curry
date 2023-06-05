@@ -1,0 +1,6 @@
+openai
+SpeechRecognition
+pvporcupine
+pvrecorder
+PyAudio
+urllib3
