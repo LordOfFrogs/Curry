@@ -17,13 +17,14 @@ WAITING_PATH = '/home/kuri/Kuri/waiting.wav'
 CONNECTING_PATH = '/home/kuri/Kuri/connecting.wav'
 
 def isConnected():
+     # try to connect to google to test connection
     try:
         urllib3.request("GET", "https://google.com")
         return True
     except:
         return False
 
-connecting_process = Popen(['play', CONNECTING_PATH, 'repeat', '100'])
+connecting_process = Popen(['play', CONNECTING_PATH, 'repeat', '100']) # play connecting sound
 while not isConnected(): pass
 connecting_process.kill()
 
